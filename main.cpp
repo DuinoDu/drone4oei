@@ -8,7 +8,6 @@
 #include "actuator.h"   			// 控制摄像头的舵机
 #include "flyer.h"     	 				// 飞控
 #include "imgprocess.hpp" 	// 图像处理算法
-//#include "imgsender.h"  		// 发送图片的socket
 
 using boost::asio::ip::tcp;
 using namespace std;
@@ -25,10 +24,11 @@ void sendImage(){
             tcp::socket socket(io);
             acceptor.accept(socket);
             Mat imgSend = Mat::zeros(1, 230400, CV_8U);
+            Mat littleImg = Mat::zeros(240, 320, CV_8SC3);
+            resize(frame, littleImg, littleImg.size());
             if(frame.isContinuous()){
-                imgSend = frame.reshape(0,1);
+                imgSend = littleImg.reshape(0,1);
             }
-
             boost::system::error_code ec;
             string message((char*) imgSend.data, 230400);
             socket.write_some(boost::asio::buffer(message), ec);
@@ -44,21 +44,20 @@ int main( int argc, char **argv )
 {
     Actuator actuator;
     Flyer flyer;
-    //ImgSender imgsender;
 
     bool foundRed = false;
     int stepState = 0;
 
     // open camera
-    VideoCapture capture(camera_id);
+    cv::VideoCapture capture(camera_id);
     if(!capture.isOpened()){ 
         cerr << "Fail to open camera";
         return -1;
     }
 
     // get image property
-    double rate = capture.get(CV_CAP_PROP_FPS);
-    int delay = 1000/rate;
+    //double rate = capture.get(CV_CAP_PROP_FPS);
+    //int delay = 1000/rate;
     int width = capture.get(CV_CAP_PROP_FRAME_WIDTH);  	// assump the origin is at left top
     int height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
 
