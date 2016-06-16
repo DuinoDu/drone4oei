@@ -6,3 +6,4 @@ build/Makefile
 build/cmake_install.cmake
 build/install_manifest.txt
 build/CTestTestfile.cmake
+CMakeLists.txt.user
