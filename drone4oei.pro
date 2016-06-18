@@ -5,6 +5,7 @@
 TEMPLATE = app
 TARGET = drone4oei
 INCLUDEPATH += .
+CONFIG += c++11
 
 # Input
 HEADERS += actuator.h flyer.h imgprocess.hpp 

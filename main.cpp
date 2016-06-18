@@ -5,15 +5,15 @@
 #include <boost/array.hpp>
 #include <boost/thread/thread.hpp>
 
-#include "actuator.h"   			// 控制摄像头的舵机
-#include "flyer.h"     	 				// 飞控
+#include "actuator.h" 		// 控制摄像头的舵机
+#include "flyer.h"			// 飞控
 #include "imgprocess.hpp" 	// 图像处理算法
 
 using boost::asio::ip::tcp;
 using namespace std;
 using namespace cv;
 
-int camera_id = 1;
+int camera_id = 0;
 Mat frame;
 
 void sendImage(){
@@ -83,6 +83,8 @@ int main( int argc, char **argv )
     // begin second thread of sending image
     boost::thread imgSender(sendImage);
 
+    namedWindow("src");
+
     while(true)
     {
         // read image
@@ -90,7 +92,9 @@ int main( int argc, char **argv )
             cerr << "Fail to read image from capture";
             break;
         }
-        
+
+        cv::imshow("src", frame);
+
         // Step 1: detect red box in the image
         if(flyer.isOK() && (stepState == 0)){ 
             // detect red box
