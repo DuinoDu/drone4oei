@@ -13,21 +13,28 @@ using boost::asio::ip::tcp;
 using namespace std;
 using namespace cv;
 
-int camera_id = 0;
+int camera_id = 1;
 Mat frame;
 
 void sendImage(){
     try{
         boost::asio::io_service io;
         tcp::acceptor acceptor(io, tcp::endpoint(tcp::v4(), 3200));
+        acceptor.local_endpoint().address().to_string();
         for(;;){
             tcp::socket socket(io);
             acceptor.accept(socket);
+            cout << "Connected from "<< socket.remote_endpoint().address().to_string() << endl;
+
             Mat imgSend = Mat::zeros(1, 230400, CV_8U);
             Mat littleImg = Mat::zeros(240, 320, CV_8SC3);
             resize(frame, littleImg, littleImg.size());
             if(frame.isContinuous()){
                 imgSend = littleImg.reshape(0,1);
+            }
+            else{
+                cout << "Bad image data to send" << endl;
+                continue;
             }
             boost::system::error_code ec;
             string message((char*) imgSend.data, 230400);
@@ -42,6 +49,10 @@ void sendImage(){
 
 int main( int argc, char **argv )
 {
+//    if(argc == 2){
+//        camera_id = (int)argv[1];
+//    }
+
     Actuator actuator;
     Flyer flyer;
 
@@ -60,6 +71,9 @@ int main( int argc, char **argv )
     //int delay = 1000/rate;
     int width = capture.get(CV_CAP_PROP_FRAME_WIDTH);  	// assump the origin is at left top
     int height = capture.get(CV_CAP_PROP_FRAME_HEIGHT);
+
+    cout << "frame width "<< width << endl;
+    cout << "frame height" << height << endl;
 
     int objPosRange = 50;
 
